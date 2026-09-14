@@ -1,0 +1,27 @@
+# Environment
+.venv
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# InsightFace model cache
+~/.insightface/
+
+# Student photos (never commit reference images)
+storage/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
