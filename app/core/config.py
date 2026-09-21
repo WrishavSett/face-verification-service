@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Face Verification Service"
 
     class Config:
-        env_file = ".env"
+        env_file = ".config"
         env_file_encoding = "utf-8"
 
 
