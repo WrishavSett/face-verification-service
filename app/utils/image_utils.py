@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from fastapi import UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from app.core.exceptions import InvalidImageError
 
@@ -29,7 +30,7 @@ async def decode_upload_to_bgr(upload: UploadFile) -> np.ndarray:
 
     _validate_file_size(contents)
 
-    return _decode_bytes_to_bgr(contents)
+    return await run_in_threadpool(_decode_bytes_to_bgr, contents)
 
 
 def decode_file_to_bgr(path) -> np.ndarray:

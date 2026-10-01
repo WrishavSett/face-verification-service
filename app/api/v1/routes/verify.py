@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from app.core.exceptions import (
     InvalidImageError,
@@ -54,7 +55,7 @@ async def verify(
 
     # Step 2 — Fetch reference image
     try:
-        reference_bgr = storage_service.get_reference_image(student_id)
+        reference_bgr = await run_in_threadpool(storage_service.get_reference_image, student_id)
     except StudentNotFoundError as e:
         logger.warning("Verification attempted for unknown student: '%s'", student_id)
         raise HTTPException(
@@ -64,7 +65,7 @@ async def verify(
 
     # Step 3 — Generate embeddings for both images
     try:
-        snapshot_embedding = face_service.get_embedding(snapshot_bgr, source="snapshot")
+        snapshot_embedding = await run_in_threadpool(face_service.get_embedding, snapshot_bgr, source="snapshot")
     except NoFaceDetectedError as e:
         logger.warning("No face in snapshot for student '%s'", student_id)
         raise HTTPException(
@@ -79,7 +80,7 @@ async def verify(
         )
 
     try:
-        reference_embedding = face_service.get_embedding(reference_bgr, source="reference image")
+        reference_embedding = await run_in_threadpool(face_service.get_embedding, reference_bgr, source="reference image")
     except NoFaceDetectedError as e:
         logger.error("No face in reference image for student '%s' — data integrity issue", student_id)
         raise HTTPException(

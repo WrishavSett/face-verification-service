@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from app.core.exceptions import InvalidImageError, MultipleFacesDetectedError, NoFaceDetectedError
 from app.models.responses import EnrollResponse, ErrorResponse
@@ -55,7 +56,7 @@ async def enroll(
 
     # Step 2 — Confirm exactly one face is detectable
     try:
-        face_service.get_embedding(image_bgr, source="reference image")
+        await run_in_threadpool(face_service.get_embedding, image_bgr, source="reference image")
     except NoFaceDetectedError as e:
         logger.warning("No face detected in enroll image for student '%s'", student_id)
         raise HTTPException(
@@ -79,7 +80,7 @@ async def enroll(
     await image.seek(0)
     contents = await image.read()
 
-    saved_path = storage_service.save_reference_image(student_id, contents, extension)
+    saved_path = await run_in_threadpool(storage_service.save_reference_image, student_id, contents, extension)
 
     logger.info("Enrolled reference photo for student '%s' at '%s'", student_id, saved_path)
 
